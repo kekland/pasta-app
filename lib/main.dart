@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_page.dart';
 import 'registration_page.dart';
+import 'onboarding_page.dart';
 
 void main() => runApp(new MyApp());
 
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
         primarySwatch: Colors.teal,
       ),
-      home: new RegistrationPage(),
+      home: new OnboardingPage(),
     );
   }
 }

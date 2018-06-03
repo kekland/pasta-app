@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'page.dart';
+import 'page_dragger.dart';
 import 'page_reveal.dart';
 import 'pager_indicator.dart';
 
@@ -35,17 +38,33 @@ class OnboardingPage extends StatefulWidget {
 }
 
 class OnboardingPageState extends State<OnboardingPage> {
+  StreamController<SlideUpdate> slideUpdateStream;
+
+  int activeIndex = 0;
+  SlideDirection slideDirection = SlideDirection.none;
+  double slidePercent = 0.0;
+  OnboardingPageState() {
+    slideUpdateStream = new StreamController<SlideUpdate>();
+
+    slideUpdateStream.stream.listen((SlideUpdate event) {
+      setState(() {
+        slideDirection = event.slideDirection;
+        slidePercent = event.slidePercent;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
           new Page(
-            viewModel: pages[0],
-            percentVisible: 1.0,
+            viewModel: pages[activeIndex],
+            percentVisible: 1.0 - slidePercent,
           ),
           new PageReveal(
-            revealPercent: 1.0,
+            revealPercent: slidePercent,
             child: new Page(
               viewModel: pages[1],
               percentVisible: 1.0,
@@ -54,10 +73,13 @@ class OnboardingPageState extends State<OnboardingPage> {
           new PagerIndicator(
             viewModel: PagerIndicatorViewModel(
               pages: pages,
-              activeIndex: 1,
-              slideDirection: SlideDirection.rightToLeft,
-              slidePercent: 1.0,
+              activeIndex: activeIndex,
+              slideDirection: slideDirection,
+              slidePercent: slidePercent,
             ),
+          ),
+          new PageDragger(
+            slideUpdateStream: slideUpdateStream,
           ),
         ],
       ),

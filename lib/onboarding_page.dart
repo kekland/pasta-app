@@ -37,8 +37,9 @@ class OnboardingPage extends StatefulWidget {
   }
 }
 
-class OnboardingPageState extends State<OnboardingPage> {
+class OnboardingPageState extends State<OnboardingPage> with TickerProviderStateMixin {
   StreamController<SlideUpdate> slideUpdateStream;
+  AnimatedPageDragger dragger;
 
   int activeIndex = 0;
   int nextPageIndex = 1;
@@ -61,12 +62,35 @@ class OnboardingPageState extends State<OnboardingPage> {
             nextPageIndex = activeIndex;
           }
           nextPageIndex.clamp(0, pages.length - 1);
-        } else {
+        } else if (event.updateType == UpdateType.doneDragging) {
           if (slidePercent > 0.5) {
-            activeIndex = (slideDirection == SlideDirection.leftToRight) ? activeIndex - 1 : activeIndex + 1;
+            dragger = new AnimatedPageDragger(
+              slideDirection: slideDirection,
+              slidePercent: slidePercent,
+              transitionGoal: TransitionGoal.open,
+              slideUpdateStream: slideUpdateStream,
+              vsync: this,
+            );
+          } else {
+            dragger = new AnimatedPageDragger(
+              slideDirection: slideDirection,
+              slidePercent: slidePercent,
+              transitionGoal: TransitionGoal.close,
+              slideUpdateStream: slideUpdateStream,
+              vsync: this,
+            );
+
+            nextPageIndex = activeIndex;
           }
+          dragger.run();
+        } else if (event.updateType == UpdateType.animating) {
+          slideDirection = event.slideDirection;
+          slidePercent = event.slidePercent;
+        } else if (event.updateType == UpdateType.doneAnimating) {
+          activeIndex = nextPageIndex;
           slideDirection = SlideDirection.none;
           slidePercent = 0.0;
+          dragger.dispose();
         }
       });
     });

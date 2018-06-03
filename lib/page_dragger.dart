@@ -62,7 +62,7 @@ class _PageDraggerState extends State<PageDragger> {
   }
 }
 
-class AnimationPageDragger {
+class AnimatedPageDragger {
   static const PERCENT_PER_MILLISECOND = 0.005;
 
   final slideDirection;
@@ -70,7 +70,7 @@ class AnimationPageDragger {
 
   AnimationController completionAnimationController;
 
-  AnimationPageDragger({
+  AnimatedPageDragger({
     this.slideDirection,
     this.transitionGoal,
     slidePercent,
@@ -100,15 +100,28 @@ class AnimationPageDragger {
     )
       ..addListener(() {
         final slidePercent = lerpDouble(startSlidePercent, endSlidePercent, completionAnimationController.value);
-        slideUpdateStream.add(new SlideUpdate(UpdateType.animating, slideDirection, slidePercent));
+        slideUpdateStream.add(new SlideUpdate(
+          UpdateType.animating,
+          slideDirection,
+          slidePercent,
+        ));
       })
       ..addStatusListener((AnimationStatus status) {
         if (status == AnimationStatus.completed) {
-          slideUpdateStream.add(
-            new SlideUpdate(UpdateType.doneAnimating, slideDirection, endSlidePercent)
-          )
+          slideUpdateStream.add(new SlideUpdate(
+            UpdateType.doneAnimating,
+            slideDirection,
+            endSlidePercent,
+          ));
         }
       });
+  }
+
+  run() {
+    completionAnimationController.forward(from: 0.0);
+  }
+  dispose() {
+    completionAnimationController.dispose();
   }
 }
 

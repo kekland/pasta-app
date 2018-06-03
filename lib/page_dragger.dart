@@ -15,7 +15,7 @@ class PageDragger extends StatefulWidget {
 }
 
 class _PageDraggerState extends State<PageDragger> {
-  static const FULL_TRANSITION_PX = 300.0;
+  static const FULL_TRANSITION_PX = Device;
 
   Offset dragStart;
   SlideDirection slideDirection;
@@ -40,6 +40,8 @@ class _PageDraggerState extends State<PageDragger> {
 
       if (slideDirection != SlideDirection.none) {
         slidePercent = (dx / FULL_TRANSITION_PX).abs().clamp(0.0, 1.0);
+      } else {
+        slidePercent = 0.0;
       }
       widget.slideUpdateStream.add(new SlideUpdate(UpdateType.dragging, slideDirection, slidePercent));
 
@@ -120,6 +122,7 @@ class AnimatedPageDragger {
   run() {
     completionAnimationController.forward(from: 0.0);
   }
+
   dispose() {
     completionAnimationController.dispose();
   }

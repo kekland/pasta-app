@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'page.dart';
+import 'page_reveal.dart';
+import 'pager_indicator.dart';
 
 final pages = [
   new PageViewModel(
@@ -7,21 +9,21 @@ final pages = [
     heroIcon: Icons.cloud,
     title: 'Saving in cloud',
     body: 'You can save all your pastas in cloud and download them on any device!',
-    pagerIcon: null,
+    pagerIcon: Icons.cloud,
   ),
   new PageViewModel(
     color: Colors.lightBlue,
     heroIcon: Icons.image,
     title: 'Images',
     body: 'You can also attach images into your pastas!',
-    pagerIcon: null,
+    pagerIcon: Icons.image,
   ),
   new PageViewModel(
     color: Colors.lime,
     heroIcon: Icons.share,
     title: 'Sharing',
     body: 'You can share your pastas with your friends, coworker, or even with your cat!',
-    pagerIcon: null,
+    pagerIcon: Icons.share,
   ),
 ];
 
@@ -42,9 +44,20 @@ class OnboardingPageState extends State<OnboardingPage> {
             viewModel: pages[0],
             percentVisible: 1.0,
           ),
-          new Page(
-            viewModel: pages[1],
-            percentVisible: 1.0,
+          new PageReveal(
+            revealPercent: 1.0,
+            child: new Page(
+              viewModel: pages[1],
+              percentVisible: 1.0,
+            ),
+          ),
+          new PagerIndicator(
+            viewModel: PagerIndicatorViewModel(
+              pages: pages,
+              activeIndex: 1,
+              slideDirection: SlideDirection.rightToLeft,
+              slidePercent: 1.0,
+            ),
           ),
         ],
       ),

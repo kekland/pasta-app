@@ -41,6 +41,7 @@ class OnboardingPageState extends State<OnboardingPage> {
   StreamController<SlideUpdate> slideUpdateStream;
 
   int activeIndex = 0;
+  int nextPageIndex = 1;
   SlideDirection slideDirection = SlideDirection.none;
   double slidePercent = 0.0;
   OnboardingPageState() {
@@ -48,8 +49,25 @@ class OnboardingPageState extends State<OnboardingPage> {
 
     slideUpdateStream.stream.listen((SlideUpdate event) {
       setState(() {
-        slideDirection = event.slideDirection;
-        slidePercent = event.slidePercent;
+        if (event.updateType == UpdateType.dragging) {
+          slideDirection = event.slideDirection;
+          slidePercent = event.slidePercent;
+
+          if (slideDirection == SlideDirection.leftToRight) {
+            nextPageIndex = activeIndex - 1;
+          } else if (slideDirection == SlideDirection.rightToLeft) {
+            nextPageIndex = activeIndex + 1;
+          } else {
+            nextPageIndex = activeIndex;
+          }
+          nextPageIndex.clamp(0, pages.length - 1);
+        } else {
+          if (slidePercent > 0.5) {
+            activeIndex = (slideDirection == SlideDirection.leftToRight) ? activeIndex - 1 : activeIndex + 1;
+          }
+          slideDirection = SlideDirection.none;
+          slidePercent = 0.0;
+        }
       });
     });
   }
@@ -66,8 +84,8 @@ class OnboardingPageState extends State<OnboardingPage> {
           new PageReveal(
             revealPercent: slidePercent,
             child: new Page(
-              viewModel: pages[1],
-              percentVisible: 1.0,
+              viewModel: pages[nextPageIndex],
+              percentVisible: slidePercent,
             ),
           ),
           new PagerIndicator(
@@ -80,6 +98,8 @@ class OnboardingPageState extends State<OnboardingPage> {
           ),
           new PageDragger(
             slideUpdateStream: slideUpdateStream,
+            canDragLeftToRight: activeIndex > 0,
+            canDragRightToLeft: activeIndex < pages.length - 1,
           ),
         ],
       ),
